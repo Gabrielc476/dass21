@@ -1,19 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   UserCircle,
   ClipboardList,
   BarChart2,
-  Settings,
   LogOut,
   Menu,
   User,
   Home,
+  Brain,
+  ChevronDown,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function NavMenu() {
   const pathname = usePathname();
@@ -25,6 +41,25 @@ export function NavMenu() {
     }
     return null;
   });
+  const [isMounted, setIsMounted] = useState(false);
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    setIsMounted(true);
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
 
   const handleLogout = () => {
     // Clear localStorage
@@ -39,88 +74,192 @@ export function NavMenu() {
     router.push("/login");
   };
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user || !user.username) return "U";
+    return user.username
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   const navItems = [
-    { name: "Início", href: "/", icon: <Home className="mr-2 h-5 w-5" /> },
+    { name: "Início", href: "/dashboard", icon: <Home className="h-5 w-5" /> },
     {
       name: "Pacientes",
       href: "/dashboard/patients",
-      icon: <UserCircle className="mr-2 h-5 w-5" />,
+      icon: <UserCircle className="h-5 w-5" />,
     },
   ];
 
+  if (!isMounted) {
+    return null;
+  }
+
   return (
-    <div className="flex justify-between items-center p-4 bg-white dark:bg-gray-950 border-b">
-      <div className="flex items-center">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
         <Sheet>
           <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="mr-2">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64">
-            <div className="flex flex-col gap-6 pt-4">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold">DASS-21 App</h2>
-                <p className="text-sm text-muted-foreground">
-                  Sistema de Avaliação
-                </p>
+          <SheetContent side="left" className="pr-0 sm:max-w-xs">
+            <div className="flex flex-col gap-6 px-2">
+              <div className="flex items-center gap-2">
+                <Brain className="h-6 w-6 text-primary" />
+                <div>
+                  <div className="text-lg font-bold">DASS-21 App</div>
+                  <div className="text-xs text-muted-foreground">
+                    Sistema de Avaliação
+                  </div>
+                </div>
               </div>
+
               <nav className="flex flex-col gap-2">
                 {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center rounded-md px-3 py-2 text-sm font-medium 
-                      ${
-                        pathname === item.href
+                  <SheetClose asChild key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`)
                           ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                       }`}
-                  >
-                    {item.icon}
-                    {item.name}
-                  </Link>
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center text-current">
+                        {item.icon}
+                      </span>
+                      <span className="text-sm font-medium">{item.name}</span>
+                    </Link>
+                  </SheetClose>
                 ))}
               </nav>
+
+              <div className="mt-auto">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <div className="flex items-center gap-4 mb-3">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{user?.username}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {user?.email}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full border-primary/20 text-primary hover:bg-primary/5"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sair da conta
+                  </Button>
+                </div>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="ml-4 lg:ml-0 text-xl font-bold">
-          DASS-21 App
-        </Link>
+        <div className="flex items-center">
+          <Link
+            href="/dashboard"
+            className="mr-8 flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
+            <Brain className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg hidden sm:inline-block">
+              DASS-21 App
+            </span>
+          </Link>
 
-        <nav className="hidden lg:flex ml-10 space-x-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center rounded-md px-3 py-2 text-sm font-medium 
-                ${
-                  pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
+          <nav className="hidden lg:flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`group flex items-center gap-2 text-sm font-medium transition-colors ${
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
-            >
-              {item.icon}
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+              >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current">
+                  {item.icon}
+                </span>
+                {item.name}
+                {pathname === item.href ||
+                pathname.startsWith(`${item.href}/`) ? (
+                  <span className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
+                ) : null}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-      <div className="flex items-center gap-2">
-        {user && (
-          <div className="hidden md:flex items-center mr-4 text-sm">
-            <User className="mr-2 h-4 w-4" />
-            <span>{user.username}</span>
-          </div>
-        )}
-        <Button variant="outline" size="sm" onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span className="hidden md:inline">Sair</span>
-        </Button>
+        <div className="ml-auto flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle theme"
+            className="mr-2"
+            onClick={toggleTheme}
+          >
+            {theme === "light" ? (
+              <Moon className="h-5 w-5" />
+            ) : (
+              <Sun className="h-5 w-5" />
+            )}
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="relative flex items-center gap-2 h-8 w-full justify-start rounded-md px-2 sm:pr-12 md:w-40"
+              >
+                <Avatar className="h-7 w-7 border border-primary/20">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:inline-flex text-sm font-medium">
+                  {user?.username?.split(" ")[0]}
+                </span>
+                <ChevronDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-56 border-none shadow-blue"
+            >
+              <div className="flex items-center gap-2 p-2">
+                <div className="flex flex-col space-y-0.5 leading-none">
+                  <p className="text-sm font-medium">{user?.username}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
+    </header>
   );
 }

@@ -4,6 +4,7 @@ import { NavMenu } from "@/components/dashboard/nav-menu";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -12,6 +13,14 @@ export default function DashboardLayout({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if we should use dark mode based on localStorage preference
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     const checkAuth = () => {
       try {
         const token = localStorage.getItem("token");
@@ -33,29 +42,40 @@ export default function DashboardLayout({ children }) {
       }
     };
 
-    checkAuth(); // Remove the timeout for simplicity
+    checkAuth();
   }, [pathname]);
 
-  // Enquanto verifica a autenticação, mostra uma tela vazia ou loading
+  // While checking authentication, show a loading screen
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-muted/20">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
       </div>
     );
   }
 
-  // Se não estiver autenticado, não mostra nada (o redirecionamento já foi feito)
+  // If not authenticated, don't show anything (the redirection has already been initiated)
   if (!isAuthenticated) {
     return null;
   }
 
-  // Se estiver autenticado, mostra o layout do dashboard
+  // If authenticated, show the dashboard layout
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-muted/10">
       <NavMenu />
-      <main className="flex-1 container mx-auto p-4 md:p-6">{children}</main>
-      <Toaster />
+      <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8">
+        {children}
+      </main>
+      <footer className="border-t p-4 text-center text-sm text-muted-foreground bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto">
+          DASS-21 App &copy; {new Date().getFullYear()} - Sistema de Avaliação
+          de Depressão, Ansiedade e Estresse
+        </div>
+      </footer>
+      <Toaster position="top-right" />
     </div>
   );
 }

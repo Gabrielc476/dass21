@@ -19,7 +19,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Save,
+  User,
+  UserPlus,
+  Calendar,
+  Users,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export function PatientForm({ patientId }) {
@@ -113,7 +122,7 @@ export function PatientForm({ patientId }) {
       });
 
       // Redirect back to patients list
-      router.push("/patients");
+      router.push("/dashboard/patients");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -123,97 +132,158 @@ export function PatientForm({ patientId }) {
 
   if (isEditing && isFetching) {
     return (
-      <Card className="w-full max-w-lg mx-auto">
+      <Card className="w-full max-w-lg mx-auto border-none shadow-blue">
         <CardHeader>
-          <CardTitle className="text-2xl">Carregando...</CardTitle>
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <CardTitle className="text-2xl">Carregando...</CardTitle>
+          </div>
         </CardHeader>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader>
-        <div className="flex items-center mb-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/patients")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <CardTitle className="text-2xl ml-2">
+    <div className="max-w-2xl mx-auto">
+      {/* Header with back button and title */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-10 w-10 rounded-full border-primary/20"
+          onClick={() => router.push(`/dashboard/patients`)}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
             {isEditing ? "Editar Paciente" : "Novo Paciente"}
-          </CardTitle>
+          </h1>
+          <p className="text-muted-foreground">
+            {isEditing
+              ? "Atualize as informações do paciente"
+              : "Preencha os dados do novo paciente"}
+          </p>
         </div>
-        <CardDescription>
-          {isEditing
-            ? "Atualize as informações do paciente"
-            : "Preencha os dados do novo paciente"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+      <Card className="border-none shadow-blue overflow-hidden">
+        <div className="h-2 bg-primary w-full"></div>
+        <CardHeader className="bg-muted/30">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              {isEditing ? (
+                <User className="h-5 w-5 text-primary" />
+              ) : (
+                <UserPlus className="h-5 w-5 text-primary" />
+              )}
+            </div>
+            <div>
+              <CardTitle>Dados do Paciente</CardTitle>
+              <CardDescription>
+                Informe os dados básicos do paciente para cadastro
+              </CardDescription>
+            </div>
           </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} id="patient-form" className="space-y-6">
+            {error && (
+              <Alert variant="destructive" className="border-none shadow-sm">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <div className="space-y-2">
-            <Label htmlFor="age">Idade</Label>
-            <Input
-              id="age"
-              type="number"
-              min="0"
-              max="120"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium">
+                Nome Completo *
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                  placeholder="Nome completo do paciente"
+                  required
+                />
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="gender">Gênero</Label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger id="gender">
-                <SelectValue placeholder="Selecionar gênero" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="masculino">Masculino</SelectItem>
-                <SelectItem value="feminino">Feminino</SelectItem>
-                <SelectItem value="outro">Outro</SelectItem>
-                <SelectItem value="prefiro_nao_dizer">
-                  Prefiro não dizer
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="age" className="text-sm font-medium">
+                  Idade
+                </Label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="age"
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                    placeholder="Idade em anos"
+                  />
+                </div>
+              </div>
 
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => router.push("/patients")}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar"}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+              <div className="space-y-2">
+                <Label htmlFor="gender" className="text-sm font-medium">
+                  Gênero
+                </Label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground pointer-events-none z-10" />
+                  <Select value={gender} onValueChange={setGender}>
+                    <SelectTrigger
+                      id="gender"
+                      className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                    >
+                      <SelectValue placeholder="Selecionar gênero" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                      <SelectItem value="prefiro_nao_dizer">
+                        Prefiro não dizer
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-between p-6 bg-muted/30 border-t border-muted">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => router.push("/dashboard/patients")}
+            className="border-primary/20"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Cancelar
+          </Button>
+          <Button type="submit" form="patient-form" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Salvar Paciente
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
