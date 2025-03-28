@@ -62,7 +62,7 @@ export function RegisterForm() {
       });
 
       // Redirect to dashboard
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {

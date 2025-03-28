@@ -190,7 +190,9 @@ export function AssessmentResults({ patientId, assessmentId }) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push(`/patients/${patientId}/assessments`)}
+          onClick={() =>
+            router.push(`/dashboard/patients/${patientId}/assessments`)
+          }
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

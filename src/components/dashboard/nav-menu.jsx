@@ -43,7 +43,7 @@ export function NavMenu() {
     { name: "Início", href: "/", icon: <Home className="mr-2 h-5 w-5" /> },
     {
       name: "Pacientes",
-      href: "/patients",
+      href: "/dashboard/patients",
       icon: <UserCircle className="mr-2 h-5 w-5" />,
     },
   ];

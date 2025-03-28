@@ -65,7 +65,7 @@ export function LoginForm() {
       });
 
       // Redirect to dashboard - usando replace para forçar uma nova navegação
-      router.replace("/");
+      router.push("/dashboard");
     } catch (err) {
       console.error("Erro completo:", err);
       setError(err.message);

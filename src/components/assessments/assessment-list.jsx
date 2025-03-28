@@ -159,7 +159,7 @@ export function AssessmentList({ patientId }) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push("/patients")}
+          onClick={() => router.push("/dashboard/patients")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -209,14 +209,16 @@ export function AssessmentList({ patientId }) {
           <div className="flex gap-2 mt-4">
             <Button
               variant="outline"
-              onClick={() => router.push(`/patients/${patientId}/upload`)}
+              onClick={() =>
+                router.push(`/dashboard/patients/${patientId}/upload`)
+              }
             >
               <Upload className="mr-2 h-4 w-4" />
               Upload
             </Button>
             <Button
               onClick={() =>
-                router.push(`/patients/${patientId}/new-assessment`)
+                router.push(`/dashboard/patients/${patientId}/new-assessment`)
               }
             >
               <FilePlus className="mr-2 h-4 w-4" />

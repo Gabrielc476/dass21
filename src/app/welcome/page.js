@@ -26,6 +26,7 @@ export default function WelcomePage() {
       if (token) {
         console.log(token);
         // Se já tiver token, vai direto para o dashboard
+        router.replace("/dashboard");
       }
     } catch (error) {
       console.error("Erro ao verificar token:", error);

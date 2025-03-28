@@ -14,27 +14,26 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        // Check if user is logged in
         const token = localStorage.getItem("token");
+        console.log("Auth check - token exists:", !!token);
 
         if (!token) {
-          console.log("Usuário não autenticado, redirecionando para welcome");
+          console.log("Redirecting to welcome (no token)");
           window.location.href = "/welcome";
           return;
         }
 
         setIsAuthenticated(true);
+        console.log("User authenticated successfully");
       } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
+        console.error("Auth check error:", error);
         window.location.href = "/welcome";
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Pequeno delay para garantir que o localStorage está disponível
-    const timer = setTimeout(checkAuth, 50);
-    return () => clearTimeout(timer);
+    checkAuth(); // Remove the timeout for simplicity
   }, [pathname]);
 
   // Enquanto verifica a autenticação, mostra uma tela vazia ou loading

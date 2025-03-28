@@ -152,7 +152,7 @@ export function PatientList() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Pacientes</h1>
-        <Button onClick={() => router.push("/patients/new")}>
+        <Button onClick={() => router.push("/dashboard/patients/new")}>
           <UserPlus className="mr-2 h-4 w-4" />
           Novo Paciente
         </Button>
@@ -186,7 +186,10 @@ export function PatientList() {
           <p className="mt-2 text-sm text-muted-foreground">
             Comece adicionando um novo paciente ao sistema.
           </p>
-          <Button className="mt-4" onClick={() => router.push("/patients/new")}>
+          <Button
+            className="mt-4"
+            onClick={() => router.push("/dashboard/patients/new")}
+          >
             Adicionar Paciente
           </Button>
         </div>
@@ -217,7 +220,9 @@ export function PatientList() {
                         size="icon"
                         variant="ghost"
                         onClick={() =>
-                          router.push(`/patients/${patient.id}/assessments`)
+                          router.push(
+                            `/dashboard/patients/${patient.id}/assessments`
+                          )
                         }
                       >
                         <ClipboardList className="h-4 w-4" />
@@ -225,7 +230,9 @@ export function PatientList() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => router.push(`/patients/${patient.id}`)}
+                        onClick={() =>
+                          router.push(`/dashboard/patients/${patient.id}`)
+                        }
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

@@ -85,7 +85,7 @@ export function AssessmentUpload({ patientId }) {
       });
 
       // Redirect to patient assessments
-      router.push(`/patients/${patientId}/assessments`);
+      router.push(`/dashboard/patients/${patientId}/assessments`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,7 +100,9 @@ export function AssessmentUpload({ patientId }) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push(`/patients/${patientId}/assessments`)}
+            onClick={() =>
+              router.push(`/dashboard/patients/${patientId}/assessments`)
+            }
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -160,7 +162,9 @@ export function AssessmentUpload({ patientId }) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push(`/patients/${patientId}/assessments`)}
+              onClick={() =>
+                router.push(`/dashboard/patients/${patientId}/assessments`)
+              }
             >
               Cancelar
             </Button>
