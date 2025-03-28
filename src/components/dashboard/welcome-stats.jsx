@@ -40,98 +40,74 @@ export function WelcomeStats() {
         throw new Error("Token de autenticação não encontrado");
       }
 
+      // Formato correto para o header de autorização
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
       // 1. Buscar estatísticas de pacientes
       const patientsResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/patients`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          method: "GET",
+          headers: headers,
         }
       );
 
       // 2. Buscar estatísticas de avaliações
-      // Estamos assumindo que existe um endpoint para buscar todas as avaliações
-      // Se não existir, você pode adaptar essa parte
-      const assessmentsResponse = await fetch(
+      const assessmentsPromise = fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/dass21/assessment/stats`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          method: "GET",
+          headers: headers,
         }
-      );
+      ).catch((err) => {
+        console.warn("Endpoint de estatísticas não disponível:", err);
+        return { ok: false };
+      });
 
+      // Processamos a resposta dos pacientes
       if (!patientsResponse.ok) {
+        console.error(
+          "Erro na resposta de pacientes:",
+          patientsResponse.status
+        );
         throw new Error("Erro ao buscar estatísticas de pacientes");
       }
 
-      if (!assessmentsResponse.ok) {
-        // Se o endpoint de estatísticas não existir, silenciosamente continuamos
-        console.warn(
-          "Endpoint de estatísticas não encontrado. Usando valores padrão."
-        );
-        // Definir valores padrão
-        setStats({
-          patients: (await patientsResponse.json()).patients?.length || 0,
-          assessments: 0,
-          recentAssessments: 0,
-        });
-      } else {
-        // Se tudo estiver ok, usamos os dados recebidos
-        const patientsData = await patientsResponse.json();
-        const assessmentsData = await assessmentsResponse.json();
+      const patientsData = await patientsResponse.json();
 
-        setStats({
-          patients: patientsData.patients?.length || 0,
-          assessments: assessmentsData.total || 0,
-          recentAssessments: assessmentsData.recent || 0,
-        });
+      // Tentamos processar a resposta de avaliações
+      const assessmentsResponse = await assessmentsPromise;
+      let assessmentsData = { total: 0, recent: 0 };
+
+      if (assessmentsResponse.ok) {
+        assessmentsData = await assessmentsResponse.json();
+      } else {
+        console.warn("Usando valores padrão para estatísticas de avaliações");
       }
+
+      // Atualizamos o estado com os dados obtidos
+      setStats({
+        patients: patientsData.patients?.length || 0,
+        assessments: assessmentsData.total || 0,
+        recentAssessments: assessmentsData.recent || 0,
+      });
     } catch (error) {
       console.error("Erro ao buscar estatísticas:", error);
 
-      // Tratar o caso em que a API não retorna o formato esperado
-      // ou o endpoint não existe
-      try {
-        // Tentar pelo menos obter a contagem de pacientes
-        const token = localStorage.getItem("token");
-        const patientsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/patients`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      // Notificar o usuário sobre o erro
+      toast.error("Erro ao carregar estatísticas", {
+        description: "Verifique sua conexão e tente novamente mais tarde.",
+      });
 
-        if (patientsResponse.ok) {
-          const patientsData = await patientsResponse.json();
-          setStats({
-            patients: patientsData.patients?.length || 0,
-            assessments: 0,
-            recentAssessments: 0,
-          });
-        }
-      } catch (e) {
-        // Se falhar, usar valores padrão
-        setStats({
-          patients: 0,
-          assessments: 0,
-          recentAssessments: 0,
-        });
-      }
-
-      // Notificar o usuário sobre o erro apenas se for um erro real de API
-      // e não apenas ausência de endpoints esperados
-      if (
-        error.message !==
-        "Endpoint de estatísticas não encontrado. Usando valores padrão."
-      ) {
-        toast.error("Erro ao carregar estatísticas", {
-          description: "Verifique sua conexão e tente novamente mais tarde.",
-        });
-      }
+      // Definir valores vazios para estatísticas
+      setStats({
+        patients: 0,
+        assessments: 0,
+        recentAssessments: 0,
+      });
     } finally {
       setIsLoading(false);
     }

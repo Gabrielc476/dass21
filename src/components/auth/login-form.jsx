@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const [username, setUsername] = useState("");
@@ -20,7 +20,6 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +27,8 @@ export function LoginForm() {
     setError("");
 
     try {
+      console.log("Tentando login com:", { username });
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
@@ -39,24 +40,34 @@ export function LoginForm() {
         }
       );
 
+      console.log("Status da resposta:", response.status);
+
       const data = await response.json();
+      console.log("Resposta recebida:", data.message);
 
       if (!response.ok) {
         throw new Error(data.message || "Erro ao fazer login");
+      }
+
+      // Verificação adicional para garantir que o token existe
+      if (!data.token) {
+        throw new Error("Token não fornecido pelo servidor");
       }
 
       // Store the token in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      toast({
-        title: "Login realizado com sucesso",
+      console.log("Login bem-sucedido, redirecionando...");
+
+      toast.success("Login realizado com sucesso", {
         description: "Bem-vindo de volta!",
       });
 
-      // Redirect to dashboard
-      router.push("/");
+      // Redirect to dashboard - usando replace para forçar uma nova navegação
+      router.replace("/");
     } catch (err) {
+      console.error("Erro completo:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);

@@ -28,6 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,19 +63,26 @@ export function PatientList() {
       }
 
       const response = await fetch(url, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao carregar pacientes");
+        console.error("Erro na resposta:", response.status);
+        throw new Error(`Erro ao carregar pacientes: ${response.statusText}`);
       }
 
       const data = await response.json();
-      setPatients(data.patients);
+      setPatients(data.patients || []);
     } catch (err) {
+      console.error("Erro completo:", err);
       setError(err.message);
+      toast.error("Erro ao carregar pacientes", {
+        description: err.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +104,7 @@ export function PatientList() {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -106,8 +115,12 @@ export function PatientList() {
 
       // Remove patient from the list
       setPatients(patients.filter((p) => p.id !== patientToDelete.id));
+      toast.success("Paciente removido com sucesso");
     } catch (err) {
       setError(err.message);
+      toast.error("Erro ao remover paciente", {
+        description: err.message,
+      });
     } finally {
       setIsDeleting(false);
       setPatientToDelete(null);
