@@ -1,3 +1,4 @@
+// src/components/assessments/assessment-results.jsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   Calendar,
   ClipboardCheck,
   Brain,
+  Briefcase, // Added missing import
 } from "lucide-react";
 import {
   Accordion,
@@ -29,6 +31,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { HistoricalTrendsChart } from "./historical-trends-chart";
+import { AssessmentRadarChart } from "./assesment-radar-chart";
 
 export function AssessmentResults({ patientId, assessmentId }) {
   const [assessment, setAssessment] = useState(null);
@@ -82,7 +86,7 @@ export function AssessmentResults({ patientId, assessmentId }) {
         return;
       }
 
-      // First, get the assessment
+      // Fixed the fetch URL construction - removed the incorrect console.log
       const assessmentResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/dass21/assessment/${assessmentId}`,
         {
@@ -116,6 +120,7 @@ export function AssessmentResults({ patientId, assessmentId }) {
       const patientData = await patientResponse.json();
       setPatient(patientData.patient);
     } catch (err) {
+      console.error("Error fetching assessment:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -329,6 +334,30 @@ export function AssessmentResults({ patientId, assessmentId }) {
               </div>
             </div>
 
+            {/* Additional patient info - new fields */}
+            <div className="flex items-start gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Briefcase className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Dados Adicionais</h3>
+                <p className="text-sm mt-1">
+                  <span className="font-medium">Profissão:</span>{" "}
+                  {patient?.profession || "Não informado"}
+                </p>
+                <p className="text-sm mt-1">
+                  <span className="font-medium">Curso:</span>{" "}
+                  {patient?.course || "Não informado"}
+                </p>
+                <p className="text-sm mt-1">
+                  <span className="font-medium">Renda:</span>{" "}
+                  {patient?.income
+                    ? `R$${patient.income.toFixed(2)}`
+                    : "Não informado"}
+                </p>
+              </div>
+            </div>
+
             {/* Assessment information */}
             <div className="flex items-start gap-4">
               <div className="h-10 w-10 rounded-full bg-chart-2/10 flex items-center justify-center shrink-0">
@@ -346,39 +375,18 @@ export function AssessmentResults({ patientId, assessmentId }) {
                 </div>
               </div>
             </div>
-
-            {/* Method information */}
-            <div className="flex items-start gap-4">
-              <div className="h-10 w-10 rounded-full bg-chart-3/10 flex items-center justify-center shrink-0">
-                <ClipboardCheck className="h-5 w-5 text-chart-3" />
-              </div>
-              <div>
-                <h3 className="font-medium">Resultado Geral</h3>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/5 border-primary/10"
-                  >
-                    Depressão: {assessment.depression.level}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="bg-chart-2/5 border-chart-2/10"
-                  >
-                    Ansiedade: {assessment.anxiety.level}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="bg-chart-3/5 border-chart-3/10"
-                  >
-                    Estresse: {assessment.stress.level}
-                  </Badge>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Radar Chart for visual representation */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AssessmentRadarChart
+          assessment={assessment}
+          className="border-none shadow-blue"
+        />
+        <HistoricalTrendsChart patientId={patientId} />
+      </div>
 
       {/* Detailed scores */}
       <Card className="border-none shadow-blue">

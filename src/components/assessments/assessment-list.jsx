@@ -241,7 +241,7 @@ export function AssessmentList({ patientId }) {
                       variant="ghost"
                       onClick={() =>
                         router.push(
-                          `/patients/${patientId}/assessments/${assessment.id}`
+                          `/dashboard/patients/${patientId}/assessments/${assessment.id}`
                         )
                       }
                     >

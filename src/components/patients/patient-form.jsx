@@ -1,3 +1,4 @@
+// src/components/patients/patient-form.jsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,9 @@ import {
   Calendar,
   Users,
   Loader2,
+  DollarSign,
+  BookOpen,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +39,10 @@ export function PatientForm({ patientId }) {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  // New state variables for the new fields
+  const [income, setIncome] = useState("");
+  const [course, setCourse] = useState("");
+  const [profession, setProfession] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +81,10 @@ export function PatientForm({ patientId }) {
       setName(data.patient.name);
       setAge(data.patient.age ? data.patient.age.toString() : "");
       setGender(data.patient.gender || "");
+      // Set the new fields
+      setIncome(data.patient.income ? data.patient.income.toString() : "");
+      setCourse(data.patient.course || "");
+      setProfession(data.patient.profession || "");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -108,6 +120,9 @@ export function PatientForm({ patientId }) {
           name,
           age: age ? parseInt(age) : null,
           gender,
+          income: income ? parseFloat(income) : null,
+          course,
+          profession,
         }),
       });
 
@@ -254,6 +269,61 @@ export function PatientForm({ patientId }) {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+            </div>
+            {/* New fields */}
+            <div className="space-y-2">
+              <Label htmlFor="income" className="text-sm font-medium">
+                Renda
+              </Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="income"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={income}
+                  onChange={(e) => setIncome(e.target.value)}
+                  className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                  placeholder="Renda mensal"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="course" className="text-sm font-medium">
+                  Curso
+                </Label>
+                <div className="relative">
+                  <BookOpen className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="course"
+                    type="text"
+                    value={course}
+                    onChange={(e) => setCourse(e.target.value)}
+                    className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                    placeholder="Curso ou nível educacional"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="profession" className="text-sm font-medium">
+                  Profissão
+                </Label>
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="profession"
+                    type="text"
+                    value={profession}
+                    onChange={(e) => setProfession(e.target.value)}
+                    className="pl-10 border-primary/20 focus-visible:ring-primary/30 h-10"
+                    placeholder="Profissão ou ocupação"
+                  />
                 </div>
               </div>
             </div>

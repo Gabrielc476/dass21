@@ -1,3 +1,4 @@
+// src/components/dashboard/welcome-stats.jsx
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -15,10 +16,12 @@ import {
   TrendingUp,
   Brain,
   Info,
+  Users,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { DemographicAnalysis } from "./demographic-analysis";
 
 export function WelcomeStats() {
   const [stats, setStats] = useState({
@@ -237,6 +240,9 @@ export function WelcomeStats() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Demographic Analysis Component */}
+      <DemographicAnalysis />
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="bg-muted/60 p-1 rounded-lg">
