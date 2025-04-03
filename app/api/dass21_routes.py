@@ -5,6 +5,7 @@ from app.infra.database.repositories.patient_repository import PatientRepository
 from app.core.services.dass21_service import DASS21Service
 from app.core.services.ocr_service import OCRService
 from app.utils.validators import Validators
+import datetime
 
 # Criação do blueprint
 dass21_bp = Blueprint('dass21', __name__)
@@ -15,6 +16,33 @@ patient_repository = PatientRepository()
 dass21_service = DASS21Service(dass21_repository, patient_repository)
 
 
+# Adicione este novo endpoint para estatísticas
+@dass21_bp.route('/assessment/stats', methods=['GET'])
+@jwt_required()
+def get_assessment_stats():
+    """Endpoint para obter estatísticas das avaliações"""
+    user_id = get_jwt_identity()
+
+    try:
+        # Buscar todas as avaliações
+        # Se o seu repositório não suporta filtro por user_id, pode omitir esse parâmetro
+        all_assessments = dass21_repository.get_recent(days=365, created_by=user_id)
+
+        # Calcular avaliações recentes (últimos 30 dias)
+        thirty_days_ago = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+        recent_assessments = [a for a in all_assessments if a.date >= thirty_days_ago]
+
+        # Retornar estatísticas
+        return jsonify({
+            'total': len(all_assessments),
+            'recent': len(recent_assessments)
+        }), 200
+
+    except Exception as e:
+        return jsonify({'message': f'Erro ao obter estatísticas: {str(e)}'}), 500
+
+
+# Resto do arquivo permanece igual
 @dass21_bp.route('/assessment', methods=['POST'])
 @jwt_required()
 def create_assessment():

@@ -20,6 +20,9 @@ def create_patient():
     name = data.get('name', '')
     age = data.get('age')
     gender = data.get('gender', '')
+    income = data.get('income')
+    course = data.get('course', '')
+    profession = data.get('profession', '')
 
     # Valida o nome
     if not name:
@@ -34,8 +37,19 @@ def create_patient():
         except:
             return jsonify({'message': 'Idade deve ser um número inteiro'}), 400
 
+    # Valida a renda, se fornecida
+    if income is not None:
+        try:
+            income = float(income)
+            if income < 0:
+                return jsonify({'message': 'Renda inválida'}), 400
+        except:
+            return jsonify({'message': 'Renda deve ser um número'}), 400
+
     # Cria o paciente
-    patient = patient_repository.create(name, age, gender, user_id)
+    patient = patient_repository.create(
+        name, age, gender, income, course, profession, user_id
+    )
 
     return jsonify({
         'message': 'Paciente criado com sucesso',
@@ -102,6 +116,21 @@ def update_patient(patient_id):
 
     if 'gender' in data:
         patient.gender = data['gender']
+
+    if 'income' in data:
+        try:
+            income = float(data['income']) if data['income'] is not None else None
+            if income is not None and income < 0:
+                return jsonify({'message': 'Renda inválida'}), 400
+            patient.income = income
+        except:
+            return jsonify({'message': 'Renda deve ser um número'}), 400
+
+    if 'course' in data:
+        patient.course = data['course']
+
+    if 'profession' in data:
+        patient.profession = data['profession']
 
     # Salva as alterações
     patient_repository.update(patient)

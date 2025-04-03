@@ -1,9 +1,11 @@
-# app/config.py
+# app/config.py - Updated for PostgreSQL
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
 
 load_dotenv()
+
+
 class Config:
     """Configuração base para todas as configurações"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'chave-super-secreta-mudar-em-producao'
@@ -18,7 +20,8 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuração de desenvolvimento"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+    # Prioriza o PostgreSQL, mas permite fallback para SQLite
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                               'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dev.sqlite')
 
 
@@ -33,6 +36,10 @@ class ProductionConfig(Config):
     """Configuração de produção"""
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+    # Se estiver usando Heroku, pode ser necessário ajustar o formato da URL
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
 
     # Configurações adicionais de segurança para produção
     JWT_COOKIE_SECURE = True
