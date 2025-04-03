@@ -1,3 +1,4 @@
+# app/api/patient_routes.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.infra.database.repositories.patient_repository import PatientRepository
@@ -20,8 +21,16 @@ def create_patient():
     name = data.get('name', '')
     age = data.get('age')
     gender = data.get('gender', '')
+    gender_other = data.get('gender_other', '')
+    ethnicity = data.get('ethnicity', '')
+    ethnicity_other = data.get('ethnicity_other', '')
+    marital_status = data.get('marital_status', '')
+    city_state = data.get('city_state', '')
     income = data.get('income')
+    income_range = data.get('income_range', '')
+    education_institution = data.get('education_institution', '')
     course = data.get('course', '')
+    period = data.get('period')
     profession = data.get('profession', '')
 
     # Valida o nome
@@ -46,9 +55,20 @@ def create_patient():
         except:
             return jsonify({'message': 'Renda deve ser um número'}), 400
 
+    # Valida o período, se fornecido
+    if period is not None:
+        try:
+            period = int(period)
+            if period < 1:
+                return jsonify({'message': 'Período inválido'}), 400
+        except:
+            return jsonify({'message': 'Período deve ser um número inteiro'}), 400
+
     # Cria o paciente
     patient = patient_repository.create(
-        name, age, gender, income, course, profession, user_id
+        name, age, gender, gender_other, ethnicity, ethnicity_other,
+        marital_status, city_state, income, income_range,
+        education_institution, course, period, profession, user_id
     )
 
     return jsonify({
@@ -117,6 +137,21 @@ def update_patient(patient_id):
     if 'gender' in data:
         patient.gender = data['gender']
 
+    if 'gender_other' in data:
+        patient.gender_other = data['gender_other']
+
+    if 'ethnicity' in data:
+        patient.ethnicity = data['ethnicity']
+
+    if 'ethnicity_other' in data:
+        patient.ethnicity_other = data['ethnicity_other']
+
+    if 'marital_status' in data:
+        patient.marital_status = data['marital_status']
+
+    if 'city_state' in data:
+        patient.city_state = data['city_state']
+
     if 'income' in data:
         try:
             income = float(data['income']) if data['income'] is not None else None
@@ -126,8 +161,23 @@ def update_patient(patient_id):
         except:
             return jsonify({'message': 'Renda deve ser um número'}), 400
 
+    if 'income_range' in data:
+        patient.income_range = data['income_range']
+
+    if 'education_institution' in data:
+        patient.education_institution = data['education_institution']
+
     if 'course' in data:
         patient.course = data['course']
+
+    if 'period' in data:
+        try:
+            period = int(data['period']) if data['period'] is not None else None
+            if period is not None and period < 1:
+                return jsonify({'message': 'Período inválido'}), 400
+            patient.period = period
+        except:
+            return jsonify({'message': 'Período deve ser um número inteiro'}), 400
 
     if 'profession' in data:
         patient.profession = data['profession']

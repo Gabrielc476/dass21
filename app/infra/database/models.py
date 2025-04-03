@@ -37,10 +37,17 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer)
-    gender = db.Column(db.String(20))
-    # New fields
-    income = db.Column(db.Float)  # Renda
-    course = db.Column(db.String(100))  # Curso
+    gender = db.Column(db.String(50))
+    gender_other = db.Column(db.String(100))  # Para quando 'outro' for selecionado
+    ethnicity = db.Column(db.String(50))  # Etnia
+    ethnicity_other = db.Column(db.String(100))  # Para quando 'outro' for selecionado em etnia
+    marital_status = db.Column(db.String(50))  # Estado Civil
+    city_state = db.Column(db.String(100))  # Cidade/Estado
+    income = db.Column(db.Float)  # Renda (valor numérico)
+    income_range = db.Column(db.String(50))  # Faixa de renda
+    education_institution = db.Column(db.String(100))  # Instituição de Ensino
+    course = db.Column(db.String(100))  # Curso de Graduação
+    period = db.Column(db.Integer)  # Período
     profession = db.Column(db.String(100))  # Profissão
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -55,8 +62,16 @@ class Patient(db.Model):
             'name': self.name,
             'age': self.age,
             'gender': self.gender,
+            'gender_other': self.gender_other,
+            'ethnicity': self.ethnicity,
+            'ethnicity_other': self.ethnicity_other,
+            'marital_status': self.marital_status,
+            'city_state': self.city_state,
             'income': self.income,
+            'income_range': self.income_range,
+            'education_institution': self.education_institution,
             'course': self.course,
+            'period': self.period,
             'profession': self.profession,
             'created_at': self.created_at.isoformat()
         }

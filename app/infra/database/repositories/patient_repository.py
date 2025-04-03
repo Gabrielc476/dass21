@@ -8,11 +8,29 @@ class PatientRepository:
     """Repositório para operações com pacientes"""
 
     @staticmethod
-    def create(name: str, age: int = None, gender: str = None, income: float = None,
-               course: str = None, profession: str = None, created_by: int = None) -> Patient:
+    def create(name: str, age: int = None, gender: str = None, gender_other: str = None,
+               ethnicity: str = None, ethnicity_other: str = None, marital_status: str = None,
+               city_state: str = None, income: float = None, income_range: str = None,
+               education_institution: str = None, course: str = None, period: int = None,
+               profession: str = None, created_by: int = None) -> Patient:
         """Cria um novo paciente"""
-        patient = Patient(name=name, age=age, gender=gender, income=income,
-                        course=course, profession=profession, created_by=created_by)
+        patient = Patient(
+            name=name,
+            age=age,
+            gender=gender,
+            gender_other=gender_other,
+            ethnicity=ethnicity,
+            ethnicity_other=ethnicity_other,
+            marital_status=marital_status,
+            city_state=city_state,
+            income=income,
+            income_range=income_range,
+            education_institution=education_institution,
+            course=course,
+            period=period,
+            profession=profession,
+            created_by=created_by
+        )
         db.session.add(patient)
         db.session.commit()
         return patient
