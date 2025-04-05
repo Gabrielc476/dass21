@@ -34,6 +34,8 @@ def create_app(config_name='development'):
     from app.api.auth_routes import auth_bp
     from app.api.patient_routes import patient_bp
     from app.api.dass21_routes import dass21_bp
+    from app.api.ihs2_routes import ihs2_bp
+    app.register_blueprint(ihs2_bp, url_prefix='/api/ihs2')
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(patient_bp, url_prefix='/api/patients')
