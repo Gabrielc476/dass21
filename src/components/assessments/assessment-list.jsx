@@ -19,6 +19,8 @@ import {
   Eye,
   Trash2,
   ArrowLeft,
+  BrainCircuit,
+  Plus,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -30,6 +32,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AssessmentList({ patientId }) {
   const [assessments, setAssessments] = useState([]);
@@ -175,15 +183,43 @@ export function AssessmentList({ patientId }) {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => router.push(`/patients/${patientId}/upload`)}>
+          {/* Updated to use dropdown menu for different assessment types */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Avaliação
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/dashboard/patients/${patientId}/new-assessment`)
+                }
+              >
+                <FilePlus className="mr-2 h-4 w-4" />
+                DASS-21
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(
+                    `/dashboard/patients/${patientId}/new-ihs2-assessment`
+                  )
+                }
+              >
+                <BrainCircuit className="mr-2 h-4 w-4" />
+                IHS-2
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            onClick={() =>
+              router.push(`/dashboard/patients/${patientId}/upload`)
+            }
+          >
             <Upload className="mr-2 h-4 w-4" />
             Upload
-          </Button>
-          <Button
-            onClick={() => router.push(`/patients/${patientId}/new-assessment`)}
-          >
-            <FilePlus className="mr-2 h-4 w-4" />
-            Nova Avaliação
           </Button>
         </div>
       </div>
@@ -204,9 +240,40 @@ export function AssessmentList({ patientId }) {
             Nenhuma avaliação encontrada
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Comece adicionando uma nova avaliação DASS-21 para este paciente.
+            Comece adicionando uma nova avaliação para este paciente.
           </p>
           <div className="flex gap-2 mt-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nova Avaliação
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/patients/${patientId}/new-assessment`
+                    )
+                  }
+                >
+                  <FilePlus className="mr-2 h-4 w-4" />
+                  DASS-21
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/patients/${patientId}/new-ihs2-assessment`
+                    )
+                  }
+                >
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  IHS-2
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
               variant="outline"
               onClick={() =>
@@ -216,14 +283,6 @@ export function AssessmentList({ patientId }) {
               <Upload className="mr-2 h-4 w-4" />
               Upload
             </Button>
-            <Button
-              onClick={() =>
-                router.push(`/dashboard/patients/${patientId}/new-assessment`)
-              }
-            >
-              <FilePlus className="mr-2 h-4 w-4" />
-              Nova Avaliação
-            </Button>
           </div>
         </div>
       ) : (
@@ -232,9 +291,19 @@ export function AssessmentList({ patientId }) {
             <Card key={assessment.id} className="overflow-hidden">
               <CardHeader className="bg-muted/50">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">
-                    Avaliação de {formatDate(assessment.date)}
-                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">
+                      {assessment.assessment_type === "IHS2" ? (
+                        <>
+                          <BrainCircuit className="inline-block h-4 w-4 mr-1 text-primary" />
+                          IHS-2:
+                        </>
+                      ) : (
+                        <>DASS-21:</>
+                      )}{" "}
+                      {formatDate(assessment.date)}
+                    </CardTitle>
+                  </div>
                   <div className="flex gap-1">
                     <Button
                       size="icon"
@@ -259,45 +328,82 @@ export function AssessmentList({ patientId }) {
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="flex flex-col items-center p-2 rounded bg-muted/30">
-                    <span className="text-sm font-medium mb-1">Depressão</span>
-                    <span className="text-xl font-bold">
-                      {assessment.depression.score}
-                    </span>
-                    <span
-                      className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
-                        assessment.depression.level
-                      )}`}
-                    >
-                      {assessment.depression.level}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 rounded bg-muted/30">
-                    <span className="text-sm font-medium mb-1">Ansiedade</span>
-                    <span className="text-xl font-bold">
-                      {assessment.anxiety.score}
-                    </span>
-                    <span
-                      className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
-                        assessment.anxiety.level
-                      )}`}
-                    >
-                      {assessment.anxiety.level}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 rounded bg-muted/30">
-                    <span className="text-sm font-medium mb-1">Estresse</span>
-                    <span className="text-xl font-bold">
-                      {assessment.stress.score}
-                    </span>
-                    <span
-                      className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
-                        assessment.stress.level
-                      )}`}
-                    >
-                      {assessment.stress.level}
-                    </span>
-                  </div>
+                  {assessment.assessment_type === "IHS2" ? (
+                    // Display for IHS2 assessment
+                    <>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">
+                          F1: Conv.
+                        </span>
+                        <span className="text-xl font-bold">
+                          {assessment.factor_scores?.F1 || "-"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">
+                          F2: Sent.
+                        </span>
+                        <span className="text-xl font-bold">
+                          {assessment.factor_scores?.F2 || "-"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">Total</span>
+                        <span className="text-xl font-bold">
+                          {assessment.total_score || "-"}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    // Display for DASS21 assessment
+                    <>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">
+                          Depressão
+                        </span>
+                        <span className="text-xl font-bold">
+                          {assessment.depression.score}
+                        </span>
+                        <span
+                          className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
+                            assessment.depression.level
+                          )}`}
+                        >
+                          {assessment.depression.level}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">
+                          Ansiedade
+                        </span>
+                        <span className="text-xl font-bold">
+                          {assessment.anxiety.score}
+                        </span>
+                        <span
+                          className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
+                            assessment.anxiety.level
+                          )}`}
+                        >
+                          {assessment.anxiety.level}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded bg-muted/30">
+                        <span className="text-sm font-medium mb-1">
+                          Estresse
+                        </span>
+                        <span className="text-xl font-bold">
+                          {assessment.stress.score}
+                        </span>
+                        <span
+                          className={`text-xs rounded-full px-2 py-0.5 mt-1 ${getLevelColor(
+                            assessment.stress.level
+                          )}`}
+                        >
+                          {assessment.stress.level}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
